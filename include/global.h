@@ -62,14 +62,28 @@ typedef enum {                          /* Message enumerator. */
     MESSAGE_DOCOMMIT,
     MESSAGE_READDIRECTORYMETA,
     MESSAGE_INVALID,
-    MESSAGE_EXTENTTEST
+    MESSAGE_EXTENTTEST,
+    MESSAGE_INSERT,
+    MESSAGE_EXPIRE,
+    MESSAGE_Scan,
+    MESSAGE_Release
 } Message;
+
 
 typedef struct {                        /* Extra information structure. */
     uint16_t sourceNodeID;              /* Source node ID. */
     uint64_t taskID;                    /* Task ID. */
     uint64_t sizeReceiveBuffer;         /* Size of receive buffer. */
 } ExtraInformation;
+
+typedef struct : ExtraInformation {     /* General send buffer structure. */
+    Message message;                    /* Message type. */
+    char startKey[Key_LENGTH];          /* StartKey. */
+    char endKey[Key_LENGTH];            /* EndKey. */
+    uint8_t mallocSize;                 /* malloc size. */
+    uint8_t pathLength;                 /* Length of path. */
+    uint64_t path[MAX_ADDR_LENGTH];     /* Addr list. */
+} GeneralRequestBuffer;
 
 typedef struct : ExtraInformation {     /* General send buffer structure. */
     Message message;                    /* Message type. */
