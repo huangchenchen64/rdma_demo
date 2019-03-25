@@ -14,7 +14,7 @@ endif()
 
 # Incs and Libs
 set(INCLUDE_BASE ${PROJECT_SOURCE_DIR}/include)
-include_directories("/home/huangcc/huangcc/rdma_demo/include" ${INCLUDE_BASE})
+include_directories("./rdma_demo/include" ${INCLUDE_BASE})
 link_libraries(${CRYPTO_LIBRARIES} ${CMAKE_DL_LIBS})
 
 # Source file define

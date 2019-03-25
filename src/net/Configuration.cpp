@@ -13,7 +13,7 @@ using namespace std;
 
 Configuration::Configuration() {
 	ServerCount = 0;
-    read_xml("/home/huangcc/huangcc/rdma_demo/conf.xml", pt);
+    read_xml("./conf.xml", pt);
 	ptree child = pt.get_child("address");
 
 	for(BOOST_AUTO(pos,child.begin()); pos != child.end(); ++pos) 
