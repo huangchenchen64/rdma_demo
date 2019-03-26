@@ -39,8 +39,8 @@ bool Client::RdmaCall(uint16_t DesNodeID, char *bufferSend, uint64_t lengthSend,
     uint64_t sendBuffer, receiveBuffer, remoteRecvBuffer;
     uint16_t offset = 0;
     uint32_t imm = (uint32_t)socket->getNodeID();
-    // struct  timeval startt, endd;
-    // unsigned long diff, tempCount = 0;
+    struct  timeval startt, endd;
+    unsigned long diff, tempCount = 0;
     GeneralSendBuffer *send = (GeneralSendBuffer*)bufferSend;
     lengthReceive -= ContractSendBuffer(send);
     send->taskID = ID;
@@ -64,7 +64,7 @@ bool Client::RdmaCall(uint16_t DesNodeID, char *bufferSend, uint64_t lengthSend,
     asm volatile ("sfence\n" : : );
     temp = (uint32_t)offset;
     imm = imm + (temp << 16);
-    Debug::debugItem("sendBuffer = %lx, receiveBuffer = %lx, remoteRecvBuffer = %lx, ReceiveSize = %d",
+    Debug::notifyError("sendBuffer = %lx, receiveBuffer = %lx, remoteRecvBuffer = %lx, ReceiveSize = %d",
         sendBuffer, receiveBuffer, remoteRecvBuffer, lengthReceive);
     if (send->message == MESSAGE_DISCONNECT
         || send->message == MESSAGE_UPDATEMETA
@@ -73,25 +73,27 @@ bool Client::RdmaCall(uint16_t DesNodeID, char *bufferSend, uint64_t lengthSend,
         // socket->PollCompletion(DesNodeID, 1, &wc);
         return true;
     }
+    char test[1024];
+    memcpy((void *)test, send->path, 10);
+    Debug::notifyError("Client path%s\n",test);
     socket->_RdmaBatchWrite(DesNodeID, sendBuffer, remoteRecvBuffer, lengthSend, imm, 1);
     if (isServer) {
         while (recv->message == MESSAGE_INVALID || recv->message != MESSAGE_RESPONSE)
             ;
     } else {
-        // gettimeofday(&startt,NULL);
+        gettimeofday(&startt,NULL);
         while (recv->message != MESSAGE_RESPONSE) {
-            ;
-            /* gettimeofday(&endd,NULL);
+            gettimeofday(&endd,NULL);
             diff = 1000000 * (endd.tv_sec - startt.tv_sec) + endd.tv_usec - startt.tv_usec;
             if (diff > 1000000) {
-                Debug::debugItem("Send the Fucking Message Again.");
+                Debug::notifyError("Send the Fucking Message Again.");
                 ExtentWriteSendBuffer *tempsend = (ExtentWriteSendBuffer *)sendBuffer;
                 tempsend->offset = (uint64_t)tempCount;
                 tempCount += 1;
                 socket->_RdmaBatchWrite(DesNodeID, sendBuffer, remoteRecvBuffer, lengthSend, imm, 1);
                 gettimeofday(&startt,NULL);
                 diff = 0;
-            }*/
+            }
         }
     }
     memcpy((void*)bufferReceive, (void *)receiveBuffer, lengthReceive);

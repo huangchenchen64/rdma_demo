@@ -3,7 +3,6 @@
 
 int main()
 {
-
     Server *server =new Server(2);
     char *p = (char *)server->getMemoryManagerInstance()->getDataAddress();
     while (true) {
@@ -17,6 +16,7 @@ int main()
         char test[1024];
         memcpy((void *)(test), (void *)(mm+2*4096),1024);
         Debug::notifyError(test);
+        server->getRdmaSocketInstance()->RdmaReceive(0,server->getMemoryManagerInstance()->getDataAddress(),1024);
     }
 
     return 0;
