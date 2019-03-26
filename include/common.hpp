@@ -34,9 +34,14 @@ struct nrfsfileattr
 /** Definitions. **/
 #define MAX_PATH_LENGTH 255             /* Max length of path. */
 //add by dhc :s
-#define Key_LENGTH 64             /* Length of key. */
-#define DefaultMallocSize  10     /* Default size of malloc. */
+#define KEY_LENGTH 64             /* Length of key. */
+#define DEFAULTMALLOCSIZE  10     /* Default size of malloc. */
 #define MAX_ADDR_LENGTH 1024      /* Max length of addr. */
+#define MAX_RANGE_LENGTH 1024      /* Max length of range. */
+#define ERROR 0
+#define SUCCESS 1
+#define INSUFFICIENT_SPACE 2
+#define DISCONTINUOUS_RANGE 3
 //add by dhc:e
 
 /** Definitions. **/

@@ -63,10 +63,11 @@ typedef enum {                          /* Message enumerator. */
     MESSAGE_READDIRECTORYMETA,
     MESSAGE_INVALID,
     MESSAGE_EXTENTTEST,
-    MESSAGE_INSERT,
-    MESSAGE_EXPIRE,
-    MESSAGE_Scan,
-    MESSAGE_Release
+    MESSAGE_MALLOC,     /* Malloc. */
+    MESSAGE_INSERT,     /* Insert. */
+    MESSAGE_EXPIRE,     /* Expire. */
+    MESSAGE_SCAN,       /* Scan. */
+    MESSAGE_RELEASE     /* Release Range. */
 } Message;
 
 
@@ -76,13 +77,18 @@ typedef struct {                        /* Extra information structure. */
     uint64_t sizeReceiveBuffer;         /* Size of receive buffer. */
 } ExtraInformation;
 
+typedef struct {                        /* Range information structure. */
+    char startKey[KEY_LENGTH];          /* StartKey. */
+    char endKey[KEY_LENGTH];            /* EndKey. */
+    uint64_t path;                      /* Addr. */
+} RangeInformation;
+
 typedef struct : ExtraInformation {     /* General send buffer structure. */
     Message message;                    /* Message type. */
-    char startKey[Key_LENGTH];          /* StartKey. */
-    char endKey[Key_LENGTH];            /* EndKey. */
-    uint8_t mallocSize;                 /* malloc size. */
-    uint8_t pathLength;                 /* Length of path. */
-    uint64_t path[MAX_ADDR_LENGTH];     /* Addr list. */
+    uint8_t flag;                       /* Flag. */
+    uint8_t size;                       /* Malloc size/Length of addr/Length of range. */
+    uint64_t addr[MAX_ADDR_LENGTH];     /* Addr list. */
+    RangeInformation range[MAX_RANGE_LENGTH];   /* Range list. */
 } GeneralRequestBuffer;
 
 typedef struct : ExtraInformation {     /* General send buffer structure. */
