@@ -43,6 +43,9 @@ struct nrfsfileattr
 #define INSUFFICIENT_SPACE 2
 #define DISCONTINUOUS_RANGE 3
 //add by dhc:e
+// add by weixing [20190325]:b
+#define MAX_ADDR_NUM 64
+// add e
 
 /** Definitions. **/
 #define MAX_FILE_EXTENT_COUNT 20        /* Max extent count in meta of a file. */
@@ -53,6 +56,16 @@ struct nrfsfileattr
 
 /** Classes and structures. **/
 typedef uint64_t NodeHash;              /* Node hash. */
+
+// add by weixing [20190325]:b
+typedef uint64_t GAddr;
+
+typedef struct
+{
+    int num;    /* record the number of allocated blocks*/
+    GAddr addr[MAX_ADDR_NUM];   /* the array of returned addresses*/
+} ResponseAddrList;
+// add e
 
 typedef struct 
 {
@@ -70,8 +83,7 @@ typedef struct                          /* File meta structure. */
 } FileMeta;
 
 typedef struct {
-	char names[MAX_FILE_NAME_LENGTH];
-	bool isDirectories;
+    char names[MAX_FILE_NAME_LENGTH];
 } DirectoryMetaTuple;
 
 typedef struct                          /* Directory meta structure. */
