@@ -47,6 +47,17 @@ struct nrfsfileattr
 #define MAX_ADDR_NUM 64
 // add e
 
+// add by weixing [20190330]:b
+#define GET_BIT0(x) ((x&0x01)==0x01?1:0)
+#define GET_BIT1(x) ((x&0x02)==0x02?1:0)
+#define GET_BIT2(x) ((x&0x04)==0x04?1:0)
+#define GET_BIT3(x) ((x&0x08)==0x08?1:0)
+#define GET_BIT4(x) ((x&0x10)==0x10?1:0)
+#define GET_BIT5(x) ((x&0x20)==0x20?1:0)
+#define GET_BIT6(x) ((x&0x40)==0x40?1:0)
+#define GET_BIT7(x) ((x&0x80)==0x80?1:0)
+// add e
+
 /** Definitions. **/
 #define MAX_FILE_EXTENT_COUNT 20        /* Max extent count in meta of a file. */
 //#define BLOCK_SIZE (1 * 1024 * 1024)    /* Current block size in bytes. */
@@ -59,12 +70,28 @@ typedef uint64_t NodeHash;              /* Node hash. */
 
 // add by weixing [20190325]:b
 typedef uint64_t GAddr;
+typedef long Align;     /* alignment boundary */
 
 typedef struct
 {
     int num;    /* record the number of allocated blocks*/
     GAddr addr[MAX_ADDR_NUM];   /* the array of returned addresses*/
 } ResponseAddrList;
+// add e
+
+// add by weixing [20190328]:b
+union defHeader{
+    struct info{
+        char* const addrBlock_;
+        uint64_t size_;
+        info() {
+            addrBlock_ = NULL;
+            size_ = 0;
+        };
+    };
+    Align X; /*force the memory alignment*/
+};
+typedef union defHeader BlockHeader;
 // add e
 
 typedef struct 

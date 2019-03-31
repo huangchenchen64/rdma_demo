@@ -7,8 +7,8 @@ MemoryManager::MemoryManager(uint64_t _mm, uint64_t _ServerCount,  int _DataSize
         /* Open Shared Memory. */
         /* Add Data Storage. */
         DMFSTotalSize = (uint64_t)_DataSize;
-        //DMFSTotalSize = DMFSTotalSize * 1024 * 1024 * 1024;
-        DMFSTotalSize = DMFSTotalSize * 1024;
+        DMFSTotalSize = DMFSTotalSize * 1024 * 1024 * 1024;
+        //DMFSTotalSize = DMFSTotalSize * 1024; //deleted by weixing
         /* Add Metadata Storage. */
         DMFSTotalSize += METADATA_SIZE;
         /* Add Client Message Pool. */
@@ -37,11 +37,18 @@ MemoryManager::MemoryManager(uint64_t _mm, uint64_t _ServerCount,  int _DataSize
     MetadataBaseAddress = ServerRecvBaseAddress + SERVER_MASSAGE_SIZE * SERVER_MASSAGE_NUM * ServerCount;
     DataBaseAddress = ServerRecvBaseAddress + METADATA_SIZE;
     memset((void *)DataBaseAddress, 'a', _DataSize*1024);
-    LocalLogAddress = _DataSize;
-    LocalLogAddress *= (1024);
-    LocalLogAddress += DataBaseAddress;
-    Debug::debugItem("LocalLogAddress = %lx", LocalLogAddress);
-    DistributedLogAddress = LocalLogAddress + LOCALLOGSIZE;
+    // add by weixing [20190329]:b
+    FreeMemoryPointer = (BlockHeader*)DataBaseAddress;
+    FreeMemoryPointer->info.addrBlock_ = (char*)DataBaseAddress + sizeof(BlockHeader);
+    FreeMemoryPointer->info.size_ = DMFSTotalSize * 1024 * 1024 * 1024 - sizeof(BlockHeader);
+    // add e
+    //deleted by weixing [20190329]:b
+//    LocalLogAddress = _DataSize;
+//    LocalLogAddress *= (1024);
+//    LocalLogAddress += DataBaseAddress;
+//    Debug::debugItem("LocalLogAddress = %lx", LocalLogAddress);
+//    DistributedLogAddress = LocalLogAddress + LOCALLOGSIZE;
+    //delete e
     SendPoolPointer = (uint8_t *)malloc(sizeof(uint8_t) * ServerCount);
     memset((void *)SendPoolPointer, '\0', sizeof(uint8_t) * ServerCount);
 }
@@ -104,4 +111,13 @@ void MemoryManager::setID(int ID) {
     uint32_t tid = gettid();
     th2id[tid] = ID;
 }
+
+// add by weixing [20190329]:b
+int MemoryManager::allocateMemoryBlocks(uint64_t num, GAddr *addrList){
+    if()
+}
+// add e
+
+
+
 

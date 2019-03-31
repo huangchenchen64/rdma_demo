@@ -102,6 +102,15 @@ void Server::RequestPoller(int id) {
         Debug::notifyError("Server path%s\n",test);
         switch (send->message)
         {
+            case MESSAGE_MALLOC: {
+                break;
+            }
+            case MESSAGE_SCAN: {
+                break;
+            }
+            case MESSAGE_EXPIRE: {
+                break;
+            }
             default: {
 
                 ProcessRequest(send, NodeID, offset);
@@ -111,6 +120,13 @@ void Server::RequestPoller(int id) {
     }
 }
 
+// add by weixing [20190327]:b
+void Server::ProcessLocalRequest(GeneralReceiveBuffer *send, uint16_t NodeID, uint16_t offset, GAddr *list){
+    char receiveBuffer[CLIENT_MESSAGE_SIZE];
+    uint64_t bufferRecv = (uint64_t)send;
+    return;
+}
+// add e
 
 void Server::ProcessRequest(GeneralSendBuffer *send, uint16_t NodeID, uint16_t offset) {
     char receiveBuffer[CLIENT_MESSAGE_SIZE];

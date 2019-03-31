@@ -24,6 +24,10 @@ static inline uint32_t gettid() {
 //#define LOCALLOGSIZE (40 * 1024 * 1024)
 //#define DISTRIBUTEDLOGSIZE (1024 * 1024)
 
+// add by weixing [20190328]:b
+#define BLOCK_SIZE 4*1024
+// add e
+
 #define CLIENT_MESSAGE_SIZE 1024
 #define MAX_CLIENT_NUMBER   24
 #define SERVER_MASSAGE_SIZE CLIENT_MESSAGE_SIZE
@@ -67,7 +71,7 @@ typedef enum {                          /* Message enumerator. */
     MESSAGE_INSERT,     /* Insert. */
     MESSAGE_EXPIRE,     /* Expire. */
     MESSAGE_SCAN,       /* Scan. */
-    MESSAGE_RELEASE     /* Release Range. */
+    MESSAGE_RELEASE,     /* Release Range. */
 } Message;
 
 

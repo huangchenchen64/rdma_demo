@@ -9,6 +9,7 @@
 #include "client.h"
 #include "MemoryManager.h"
 #include "global.h"
+#include "common.hpp"
 //#include "filesystem.hpp"
 //#include "TxManager.hpp"
 
@@ -37,6 +38,9 @@ private:
     bool UnlockWait;
     void Worker(int id);
     void ProcessRequest(GeneralSendBuffer *send, uint16_t NodeID, uint16_t offset);
+    // add by weixing [20190327]:b
+    void ProcessLocalRequest(GeneralReceiveBuffer *send, uint16_t NodeID, uint16_t offset, GAddr* list);
+    // add e
 public:
     Server(int cqSize);
     RdmaSocket* getRdmaSocketInstance();
