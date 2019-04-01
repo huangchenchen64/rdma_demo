@@ -23,7 +23,7 @@ set(SRC_NET ${PROJECT_SOURCE_DIR}/src/net)
 # Build library
 file(GLOB_RECURSE SRC_NET_LIB ${SRC_NET}/*.cpp)
 add_library(net SHARED ${SRC_NET_LIB})
-link_libraries(net)
+link_libraries(net pthread)
 
 
 #Build server

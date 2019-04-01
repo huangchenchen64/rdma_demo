@@ -1,3 +1,7 @@
+/*
+ * add dhc
+ * Balloc:block allock
+ */
 #ifndef CLIENT
 #define CLIENT
 
@@ -15,6 +19,10 @@ private:
     MemoryManager *mem;
     bool isServer;
     uint32_t taskID;
+    int addr_size;
+    int path_length;
+    uint64_t addr[MAX_ADDR_LENGTH];
+    uint64_t range_path[MAX_RANGE_LENGTH];
 public:
     uint64_t mm;
     Client(Configuration *conf, RdmaSocket *socket, MemoryManager *mem, uint64_t mm);
@@ -23,6 +31,7 @@ public:
     RdmaSocket* getRdmaSocketInstance();
     Configuration* getConfInstance();
     bool RdmaCall(uint16_t DesNodeID, char *bufferSend, uint64_t lengthSend, char *bufferReceive, uint64_t lengthReceive);
+    bool BAlloc(int size = MAX_ADDR_LENGTH);
     uint64_t ContractSendBuffer(GeneralSendBuffer *send);
 };
 

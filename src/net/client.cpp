@@ -1,3 +1,7 @@
+/*
+ * add dhc
+ * Balloc:block allock
+ */
 #include "client.h"
 //#include "TxManager.hpp"
 
@@ -5,11 +9,15 @@ Client::Client(Configuration *_conf, RdmaSocket *_socket, MemoryManager *_mem, u
 :conf(_conf), socket(_socket), mem(_mem), mm(_mm) {
     isServer = true;
     taskID  = 1;
+    addr_size = 0;
+    path_length = 0;
 }
 
 Client::Client() {
     isServer = false;
     taskID = 1;
+    addr_size = 0;
+    path_length = 0;
     mm = (uint64_t)malloc(sizeof(char) * (1024 * 4 + 1024 * 1024 * 4));
     conf = new Configuration();
     socket = new RdmaSocket(1, mm, (1024 * 4 + 1024 * 1024 * 4), conf, false, 0);
@@ -32,6 +40,29 @@ RdmaSocket* Client::getRdmaSocketInstance() {
 
 Configuration* Client::getConfInstance() {
     return conf;
+}
+
+bool Client::BAlloc(int size){
+	if(addr_size!=0){
+		return false;
+	}
+	uint64_t SendPoolAddr = mm + 4 * 1024;
+	GeneralRequestBuffer *send = (GeneralRequestBuffer*)SendPoolAddr;
+	send->message = MESSAGE_MALLOC;
+	send->size = DEFAULTMALLOCSIZE;
+	char value[CLIENT_MESSAGE_SIZE];
+	bool fal = RdmaCall(1, (char*)send, (uint64_t)CLIENT_MESSAGE_SIZE, value, (uint64_t)CLIENT_MESSAGE_SIZE);
+	if(fal){
+		GeneralRequestBuffer *receive = (GeneralRequestBuffer*)value;
+		if(receive->message==SUCCESS){
+			addr_size = receive->size;
+			for(int i=0;i<addr_size;i++){
+				addr[i] = receive->addr[i];
+			}
+			printf("MESSAGE_MALLOC:%d,%d\n",receive->message,receive->size);
+		}
+	}
+	return false;
 }
 
 bool Client::RdmaCall(uint16_t DesNodeID, char *bufferSend, uint64_t lengthSend, char *bufferReceive, uint64_t lengthReceive) {
