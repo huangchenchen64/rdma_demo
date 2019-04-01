@@ -84,10 +84,6 @@ union defHeader{
     struct info{
         char* const addrBlock_;
         uint64_t size_;
-        info() {
-            addrBlock_ = NULL;
-            size_ = 0;
-        };
     };
     Align X; /*force the memory alignment*/
 };

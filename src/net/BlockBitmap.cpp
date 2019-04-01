@@ -11,7 +11,7 @@
 using namespace std;
 
 int BlockBitmap::set(uint64_t k){
-    if(k < 8 * N){
+    if(k > 8 * N){
         Debug::notifyError("The value %lu exceeds the total index number %lu", k, N);
         return ERROR;
     }
@@ -20,7 +20,7 @@ int BlockBitmap::set(uint64_t k){
 }
 
 int BlockBitmap::clear(uint64_t k){
-    if(k < 8 * N){
+    if(k > 8 * N){
         Debug::notifyError("The value %lu exceeds the total index number %lu", k, N);
         return ERROR;
     }
@@ -42,7 +42,7 @@ int BlockBitmap::getAvailableBlocks(uint64_t num, uint64_t *lists){
         }
         else{
             while(pos < 8){
-                if(!(bits_[i] & (1 << (pos)))){
+                if(!(bits_[i] & (1 << (7-pos)))){
                     bits_[i] |= (1<<pos);
                     lists[count_] = i*8+pos;
                     pos++;
