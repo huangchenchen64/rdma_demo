@@ -44,11 +44,11 @@ int BlockBitmap::getAvailableBlocks(uint64_t num, uint64_t *lists){
             while(pos < 8){
                 if(!(bits_[i] & (1 << (pos)))){
                     bits_[i] |= (1<<pos);
-                    lists[count_] = i*8+pos+1;
+                    lists[count_] = i*8+pos;
                     pos++;
                     this->set(lists[count_]);
                     count_++;
-                    if(count_ == num){
+                    if(count_ == (num - 1)){
                         boost::lock_guard<boost::detail::spinlock> unlock(this->bits_lock_);
                         return SUCCESS;
                     }

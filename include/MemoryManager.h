@@ -10,6 +10,7 @@
 #include <debug.hpp>
 #include "global.h"
 #include "common.hpp"
+#include "BlockBitmap.h"
 #define SHARE_MEMORY_KEY 78
 
 typedef unordered_map<uint32_t, int> Thread2ID;
@@ -24,16 +25,18 @@ private:
     uint64_t DataBaseAddress;
     uint8_t *SendPoolPointer;
     uint64_t DMFSTotalSize;
-    //uint64_t LocalLogAddress; //deleted by weixing
+    uint64_t LocalLogAddress;
     uint64_t DistributedLogAddress;
     uint64_t BlockSize; // the default conf added by weixing
     int shmid;
     Thread2ID th2id;
-    BlockHeader* FreeMemoryPointer; // the pointer to free memory add by weixing
+    BlockBitmap *BB_;   // the bitmap that record the usage of memory allocation
+
 public:
     MemoryManager(uint64_t mm, uint64_t ServerCount, int DataSize);
     ~MemoryManager();
     int allocateMemoryBlocks(uint64_t num, GAddr* addrList); //allocate memory blocks added by weixing [20190329]
+    int freeMemoryBlocks(uint64_t num, GAddr* addrList);    // free up memory blocks added by weixing [20190331]
     uint64_t getDmfsBaseAddress();
     uint64_t getDmfsTotalSize();
     uint64_t getMetadataBaseAddress();

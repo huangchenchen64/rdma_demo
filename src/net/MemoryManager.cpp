@@ -37,11 +37,6 @@ MemoryManager::MemoryManager(uint64_t _mm, uint64_t _ServerCount,  int _DataSize
     MetadataBaseAddress = ServerRecvBaseAddress + SERVER_MASSAGE_SIZE * SERVER_MASSAGE_NUM * ServerCount;
     DataBaseAddress = ServerRecvBaseAddress + METADATA_SIZE;
     memset((void *)DataBaseAddress, 'a', _DataSize*1024);
-    // add by weixing [20190329]:b
-    FreeMemoryPointer = (BlockHeader*)DataBaseAddress;
-    FreeMemoryPointer->info.addrBlock_ = (char*)DataBaseAddress + sizeof(BlockHeader);
-    FreeMemoryPointer->info.size_ = DMFSTotalSize * 1024 * 1024 * 1024 - sizeof(BlockHeader);
-    // add e
     //deleted by weixing [20190329]:b
 //    LocalLogAddress = _DataSize;
 //    LocalLogAddress *= (1024);
@@ -51,6 +46,10 @@ MemoryManager::MemoryManager(uint64_t _mm, uint64_t _ServerCount,  int _DataSize
     //delete e
     SendPoolPointer = (uint8_t *)malloc(sizeof(uint8_t) * ServerCount);
     memset((void *)SendPoolPointer, '\0', sizeof(uint8_t) * ServerCount);
+    // add by weixing [20190330]:b
+    uint64_t num = _DataSize/BLOCK_SIZE + 1;
+    BB_ = new BlockBitmap(num);
+    // add e
 }
 
 MemoryManager::~MemoryManager() {
@@ -114,7 +113,52 @@ void MemoryManager::setID(int ID) {
 
 // add by weixing [20190329]:b
 int MemoryManager::allocateMemoryBlocks(uint64_t num, GAddr *addrList){
-    if()
+    if(num > MAX_ADDR_NUM){
+        Debug::notifyError("The requested num %lu exceeds the MAX_ADDR_NUM %lu",num,MAX_ADDR_NUM);
+        return ERROR;
+    }
+    if(NULL == BB_){
+        Debug::notifyError("Failed to allocate memory blocks! BB_ is Nullptr!");
+        return ERROR;
+    }else if(NULL != BB_){
+        if(SUCCESS != (BB_->getAvailableBlocks(num,addrList))){
+            Debug::notifyError("Failed to get available blocks!");
+            return ERROR;
+        }else{
+            BB_->getAvailableBlocks(num,addrList);
+            for(uint64_t i = 0; i < num; i++){
+                addrList[i] = DataBaseAddress + addrList[i] * BLOCK_SIZE;
+            }
+            return SUCCESS;
+        }
+
+    }else{
+        return ERROR;
+    }
+}
+
+int MemoryManager::freeMemoryBlocks(uint64_t num, GAddr *addrList){
+    if(NULL == BB_){
+        Debug::notifyError("Failed to free up memory blocks! BB_ is Nullptr!");
+        return ERROR;
+    }else if(0 == num || NULL ==  addrList){
+        Debug::notifyError("Failed to free up memory blocks! Parameter is NULL!");
+        return ERROR;
+    }else{
+        bool tag = false;
+        for(uint64_t i = 0; i < num; i++){
+            if(SUCCESS != (BB_->clear(addrList[i]))){
+                Debug::notifyError("Failed to free up memory block:%lu",addrList[i]);
+                tag = true;
+                continue;
+            }
+        }
+        if(tag){
+            return ERROR;
+        }else{
+            return SUCCESS;
+        }
+    }
 }
 // add e
 
