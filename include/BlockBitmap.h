@@ -13,14 +13,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <linux/spinlock.h>
+#include <boost/smart_ptr/detail/spinlock.hpp>
 
 
 class BlockBitmap {
 private:
     char* bits_;
     int N;
-    spinlock_t bits_lock_;
+    boost::detail::spinlock bits_lock_;
 protected:
     void init(uint64_t n){
         bits_ = new char(N=(n+7)/8);    // allocated memory
