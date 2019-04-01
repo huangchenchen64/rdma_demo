@@ -125,7 +125,6 @@ int MemoryManager::allocateMemoryBlocks(uint64_t num, GAddr *addrList){
             Debug::notifyError("Failed to get available blocks!");
             return ERROR;
         }else{
-            BB_->getAvailableBlocks(num,addrList);
             for(uint64_t i = 0; i < num; i++){
                 addrList[i] = DataBaseAddress + addrList[i] * BLOCK_SIZE;
             }
