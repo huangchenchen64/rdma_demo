@@ -22,8 +22,9 @@ int port_worker = 5967;
 int no_thread = 1;
 int no_client = 1;
 int scan_ratio = 100;
-int val_size = 64;
+int val_size = 1024*1024*2;
 int total_scan = 1000;
+int total_range = 100*1000;
 const char *log_dir = "./rdma_client.out";
 
 pthread_t *threads;
@@ -104,20 +105,44 @@ void populate(Client* client) {
 
   uint64_t start = mstime();
   printf("start to populate\n");
+  client->BlockAlloc(MAX_ADDR_LENGTH);
 
-  uint64_t DmfsDataOffset;
-  DmfsDataOffset =  CLIENT_MESSAGE_SIZE * MAX_CLIENT_NUMBER;
-  DmfsDataOffset += SERVER_MASSAGE_SIZE * SERVER_MASSAGE_NUM * client->getConfInstance()->getServerCount();
-  DmfsDataOffset += METADATA_SIZE;
+  uint64_t SendPoolAddr = client->mm + 4 * 1024; //?
+  memcpy((void *)SendPoolAddr, (void *)(value), val_size);
 
-  char value_buf[1024*1024*2];
-  memset(value_buf,0,1024);
-  uint64_t size=1024*1024*2;
-  uint64_t SendPoolAddr = client->mm + 4 * size; //?
-  memcpy((void *)SendPoolAddr, (void *)(value), size);
-  client->getRdmaSocketInstance()->RdmaWrite(1, SendPoolAddr,DmfsDataOffset, size,-1,0);
-
+  //prepare index
+  uint64_t SendPoolAddr = mm + 4 * 1024;
+  GeneralRequestBuffer *send = (GeneralRequestBuffer*)SendPoolAddr;
+  send->message = MESSAGE_INSERT;
+  send->size = total_range/100;
+  //insert data
+  for(int i=0; i<total_range/100; i++){
+    //generate block id
+    int number = i;
+    char num[10];
+    int len=0;
+    while(number>0){
+      num[i]=number%10+'0';
+      number/=10;
+      len++;
+    }
+    num[len]='\0';
+    strcat(num," data:");
+    for(int j=0; j<len/2; j++){
+	  char change = num[j];
+	  num[j] = num[len-j];
+	  num[len-j] = change;
+    }
+    memcpy((void *)SendPoolAddr, (void *)(num), len+6);
+    //prepare index
+    send->range[i].startKey=i*100;
+    send->range[i].endKey=(i+1)*100-1;
+    send->range[i].path = client->BlockWrite(SendPoolAddr);
+  }
   double duration = mstime() - start;
+
+  //insert index
+  client->IndexWrite((char*)send);
 }
 
 
@@ -135,13 +160,16 @@ void* do_work(void *arg) {
       //scan
       t1 = nstime();
       //client->
+      if(client->RangeCover()){
+    	while(client->BlockRead())
+      }
       t2 = nstime();
       scan_latency += (t2 - t1);
       scan_finished++;
     } else {
       //write
       t1 = nstime();
-      //cli->put(key, value);
+      //client->BlockWirte();
       t2 = nstime();
       write_latency += (t2 - t1);
       write_finished++;

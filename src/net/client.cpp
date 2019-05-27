@@ -22,6 +22,9 @@ Client::Client() {
     conf = new Configuration();
     socket = new RdmaSocket(1, mm, (1024 * 4 + 1024 * 1024 * 4), conf, false, 0);
     socket->RdmaConnect();
+    DmfsDataOffset =  CLIENT_MESSAGE_SIZE * MAX_CLIENT_NUMBER;
+    DmfsDataOffset += SERVER_MASSAGE_SIZE * SERVER_MASSAGE_NUM * conf->getServerCount();
+    DmfsDataOffset += METADATA_SIZE;
 }
 
 Client::~Client() {
@@ -42,7 +45,20 @@ Configuration* Client::getConfInstance() {
     return conf;
 }
 
-bool Client::BAlloc(int size){
+uint64_t Client::BlockWrite(uint64_t SourceBuffer, uint64_t BufferSize, uint32_t imm, int TaskID, uint16_t NodeID){
+  if(addr_size==0){
+	  BAlloc(MAX_ADDR_LENGTH);
+  }
+  uint64_t DesBuffer = addr[addr_size-1];
+  if(getRdmaSocketInstance()->RdmaWrite(NodeID, SourceBuffer, DesBuffer, BufferSize, imm, TaskID))
+  {
+	addr_size--;
+	return addr[addr_size-1];
+  }
+  return -1;
+}
+
+bool Client::BlockAlloc(int size){
 	if(addr_size!=0){
 		return false;
 	}
@@ -60,6 +76,37 @@ bool Client::BAlloc(int size){
 				addr[i] = receive->addr[i];
 			}
 			printf("MESSAGE_MALLOC:%d,%d\n",receive->message,receive->size);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Client::IndexWrite(char * SourceBuffer, uint64_t BufferSize = CLIENT_MESSAGE_SIZE, uint16_t DesNodeID){
+	char value[CLIENT_MESSAGE_SIZE];
+	bool fal = RdmaCall(DesNodeID, SourceBuffer, (uint64_t)CLIENT_MESSAGE_SIZE, value, (uint64_t)CLIENT_MESSAGE_SIZE);
+	if(fal){
+		GeneralRequestBuffer *receive = (GeneralRequestBuffer*)value;
+		if(receive->message==SUCCESS){
+			printf("MESSAGE_INSERT:%d,%d\n",receive->message,receive->size);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Client::RangeCover(char * SourceBuffer, uint64_t BufferSize = CLIENT_MESSAGE_SIZE, uint16_t DesNodeID){
+	char value[CLIENT_MESSAGE_SIZE];
+	bool fal = RdmaCall(DesNodeID, SourceBuffer, (uint64_t)CLIENT_MESSAGE_SIZE, value, (uint64_t)CLIENT_MESSAGE_SIZE);
+	if(fal){
+		GeneralRequestBuffer *receive = (GeneralRequestBuffer*)value;
+		if(receive->message==SUCCESS){
+			addr_size = receive->size;
+			for(int i=0;i<addr_size;i++){
+				addr[i] = receive->addr[i];
+			}
+			printf("MESSAGE_INSERT:%d,%d\n",receive->message,receive->size);
+			return true;
 		}
 	}
 	return false;
